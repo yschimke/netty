@@ -15,18 +15,8 @@
  */
 package io.netty.resolver.dns;
 
-import io.netty.channel.AddressedEnvelope;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelPromise;
-import io.netty.handler.codec.dns.DatagramDnsQuery;
-import io.netty.handler.codec.dns.AbstractDnsOptPseudoRrRecord;
-import io.netty.handler.codec.dns.DnsQuery;
-import io.netty.handler.codec.dns.DnsQuestion;
-import io.netty.handler.codec.dns.DnsRecord;
-import io.netty.handler.codec.dns.DnsResponse;
-import io.netty.handler.codec.dns.DnsSection;
+import io.netty.channel.*;
+import io.netty.handler.codec.dns.*;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
@@ -94,7 +84,7 @@ final class DnsQueryContext {
 
         query.addRecord(DnsSection.QUESTION, question);
 
-        for (DnsRecord record: additionals) {
+        for (DnsRecord record : additionals) {
             query.addRecord(DnsSection.ADDITIONAL, record);
         }
 
@@ -207,10 +197,10 @@ final class DnsQueryContext {
 
         final StringBuilder buf = new StringBuilder(message.length() + 64);
         buf.append('[')
-           .append(nameServerAddr)
-           .append("] ")
-           .append(message)
-           .append(" (no stack trace available)");
+                .append(nameServerAddr)
+                .append("] ")
+                .append(message)
+                .append(" (no stack trace available)");
 
         final DnsNameResolverException e;
         if (cause == null) {

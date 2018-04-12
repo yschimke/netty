@@ -30,7 +30,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoop;
 import io.netty.channel.FixedRecvByteBufAllocator;
-import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.handler.codec.dns.DatagramDnsQueryEncoder;
 import io.netty.handler.codec.dns.DatagramDnsResponse;
@@ -151,7 +150,7 @@ public class DnsNameResolver extends InetNameResolver {
     private static final DatagramDnsQueryEncoder ENCODER = new DatagramDnsQueryEncoder();
 
     final Future<Channel> channelFuture;
-    final DatagramChannel ch;
+    final Channel ch;
 
     /**
      * Manages the {@link DnsQueryContext}s in progress and their query IDs.
@@ -194,7 +193,7 @@ public class DnsNameResolver extends InetNameResolver {
      * Creates a new DNS-based name resolver that communicates with the specified list of DNS servers.
      *
      * @param eventLoop the {@link EventLoop} which will perform the communication with the DNS servers
-     * @param channelFactory the {@link ChannelFactory} that will create a {@link DatagramChannel}
+     * @param channelFactory the {@link ChannelFactory} that will create a {@link Channel}
      * @param resolveCache the DNS resolved entries cache
      * @param authoritativeDnsServerCache the cache used to find the authoritative DNS server for a domain
      * @param dnsQueryLifecycleObserverFactory used to generate new instances of {@link DnsQueryLifecycleObserver} which
@@ -217,7 +216,7 @@ public class DnsNameResolver extends InetNameResolver {
      */
     public DnsNameResolver(
             EventLoop eventLoop,
-            ChannelFactory<? extends DatagramChannel> channelFactory,
+            ChannelFactory<?> channelFactory,
             final DnsCache resolveCache,
             DnsCache authoritativeDnsServerCache,
             DnsQueryLifecycleObserverFactory dnsQueryLifecycleObserverFactory,
@@ -293,15 +292,15 @@ public class DnsNameResolver extends InetNameResolver {
         b.channelFactory(channelFactory);
         b.option(ChannelOption.DATAGRAM_CHANNEL_ACTIVE_ON_REGISTRATION, true);
         final DnsResponseHandler responseHandler = new DnsResponseHandler(executor().<Channel>newPromise());
-        b.handler(new ChannelInitializer<DatagramChannel>() {
+        b.handler(new ChannelInitializer<Channel>() {
             @Override
-            protected void initChannel(DatagramChannel ch) throws Exception {
+            protected void initChannel(Channel ch) throws Exception {
                 ch.pipeline().addLast(DECODER, ENCODER, responseHandler);
             }
         });
 
         channelFuture = responseHandler.channelActivePromise;
-        ch = (DatagramChannel) b.register().channel();
+        ch = b.register().channel();
         ch.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(maxPayloadSize));
 
         ch.closeFuture().addListener(new ChannelFutureListener() {

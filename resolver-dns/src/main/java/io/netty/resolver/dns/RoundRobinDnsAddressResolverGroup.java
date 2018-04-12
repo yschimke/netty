@@ -16,9 +16,9 @@
 
 package io.netty.resolver.dns;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFactory;
 import io.netty.channel.EventLoop;
-import io.netty.channel.socket.DatagramChannel;
 import io.netty.resolver.AddressResolver;
 import io.netty.resolver.AddressResolverGroup;
 import io.netty.resolver.NameResolver;
@@ -37,13 +37,13 @@ import java.net.InetSocketAddress;
 public class RoundRobinDnsAddressResolverGroup extends DnsAddressResolverGroup {
 
     public RoundRobinDnsAddressResolverGroup(
-            Class<? extends DatagramChannel> channelType,
+            Class<? extends Channel> channelType,
             DnsServerAddressStreamProvider nameServerProvider) {
         super(channelType, nameServerProvider);
     }
 
     public RoundRobinDnsAddressResolverGroup(
-            ChannelFactory<? extends DatagramChannel> channelFactory,
+            ChannelFactory<? extends Channel> channelFactory,
             DnsServerAddressStreamProvider nameServerProvider) {
         super(channelFactory, nameServerProvider);
     }

@@ -16,10 +16,10 @@
 
 package io.netty.resolver.dns;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFactory;
 import io.netty.channel.EventLoop;
 import io.netty.channel.ReflectiveChannelFactory;
-import io.netty.channel.socket.DatagramChannel;
 import io.netty.resolver.AddressResolver;
 import io.netty.resolver.AddressResolverGroup;
 import io.netty.resolver.InetSocketAddressResolver;
@@ -42,20 +42,20 @@ import static io.netty.util.internal.PlatformDependent.newConcurrentHashMap;
 @UnstableApi
 public class DnsAddressResolverGroup extends AddressResolverGroup<InetSocketAddress> {
 
-    private final ChannelFactory<? extends DatagramChannel> channelFactory;
+    private final ChannelFactory<? extends Channel> channelFactory;
     private final DnsServerAddressStreamProvider nameServerProvider;
 
     private final ConcurrentMap<String, Promise<InetAddress>> resolvesInProgress = newConcurrentHashMap();
     private final ConcurrentMap<String, Promise<List<InetAddress>>> resolveAllsInProgress = newConcurrentHashMap();
 
     public DnsAddressResolverGroup(
-            Class<? extends DatagramChannel> channelType,
+            Class<? extends Channel> channelType,
             DnsServerAddressStreamProvider nameServerProvider) {
-        this(new ReflectiveChannelFactory<DatagramChannel>(channelType), nameServerProvider);
+        this(new ReflectiveChannelFactory<Channel>(channelType), nameServerProvider);
     }
 
     public DnsAddressResolverGroup(
-            ChannelFactory<? extends DatagramChannel> channelFactory,
+            ChannelFactory<? extends Channel> channelFactory,
             DnsServerAddressStreamProvider nameServerProvider) {
         this.channelFactory = channelFactory;
         this.nameServerProvider = nameServerProvider;
@@ -67,7 +67,7 @@ public class DnsAddressResolverGroup extends AddressResolverGroup<InetSocketAddr
         if (!(executor instanceof EventLoop)) {
             throw new IllegalStateException(
                     "unsupported executor type: " + StringUtil.simpleClassName(executor) +
-                    " (expected: " + StringUtil.simpleClassName(EventLoop.class));
+                            " (expected: " + StringUtil.simpleClassName(EventLoop.class));
         }
 
         return newResolver((EventLoop) executor, channelFactory, nameServerProvider);
@@ -78,7 +78,7 @@ public class DnsAddressResolverGroup extends AddressResolverGroup<InetSocketAddr
      */
     @Deprecated
     protected AddressResolver<InetSocketAddress> newResolver(
-            EventLoop eventLoop, ChannelFactory<? extends DatagramChannel> channelFactory,
+            EventLoop eventLoop, ChannelFactory<? extends Channel> channelFactory,
             DnsServerAddressStreamProvider nameServerProvider) throws Exception {
 
         final NameResolver<InetAddress> resolver = new InflightNameResolver<InetAddress>(
@@ -95,7 +95,7 @@ public class DnsAddressResolverGroup extends AddressResolverGroup<InetSocketAddr
      * implementation or override the default configuration.
      */
     protected NameResolver<InetAddress> newNameResolver(EventLoop eventLoop,
-                                                        ChannelFactory<? extends DatagramChannel> channelFactory,
+                                                        ChannelFactory<? extends Channel> channelFactory,
                                                         DnsServerAddressStreamProvider nameServerProvider)
             throws Exception {
         return new DnsNameResolverBuilder(eventLoop)

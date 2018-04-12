@@ -15,10 +15,10 @@
  */
 package io.netty.resolver.dns;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFactory;
 import io.netty.channel.EventLoop;
 import io.netty.channel.ReflectiveChannelFactory;
-import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.resolver.HostsFileEntriesResolver;
 import io.netty.resolver.ResolvedAddressTypes;
@@ -37,7 +37,7 @@ import static io.netty.util.internal.ObjectUtil.intValue;
 @UnstableApi
 public final class DnsNameResolverBuilder {
     private final EventLoop eventLoop;
-    private ChannelFactory<? extends DatagramChannel> channelFactory;
+    private ChannelFactory channelFactory;
     private DnsCache resolveCache;
     private DnsCache authoritativeDnsServerCache;
     private Integer minTtl;
@@ -62,19 +62,19 @@ public final class DnsNameResolverBuilder {
      * Creates a new builder.
      *
      * @param eventLoop the {@link EventLoop} the {@link EventLoop} which will perform the communication with the DNS
-     * servers.
+     *                  servers.
      */
     public DnsNameResolverBuilder(EventLoop eventLoop) {
         this.eventLoop = eventLoop;
     }
 
     /**
-     * Sets the {@link ChannelFactory} that will create a {@link DatagramChannel}.
+     * Sets the {@link ChannelFactory} that will create a {@link Channel}.
      *
      * @param channelFactory the {@link ChannelFactory}
      * @return {@code this}
      */
-    public DnsNameResolverBuilder channelFactory(ChannelFactory<? extends DatagramChannel> channelFactory) {
+    public DnsNameResolverBuilder channelFactory(ChannelFactory<? extends Channel> channelFactory) {
         this.channelFactory = channelFactory;
         return this;
     }
@@ -86,8 +86,8 @@ public final class DnsNameResolverBuilder {
      * @param channelType the type
      * @return {@code this}
      */
-    public DnsNameResolverBuilder channelType(Class<? extends DatagramChannel> channelType) {
-        return channelFactory(new ReflectiveChannelFactory<DatagramChannel>(channelType));
+    public DnsNameResolverBuilder channelType(Class<? extends Channel> channelType) {
+        return channelFactory(new ReflectiveChannelFactory<Channel>(channelType));
     }
 
     /**
@@ -97,12 +97,13 @@ public final class DnsNameResolverBuilder {
      * @return {@code this}
      */
     public DnsNameResolverBuilder resolveCache(DnsCache resolveCache) {
-        this.resolveCache  = resolveCache;
+        this.resolveCache = resolveCache;
         return this;
     }
 
     /**
      * Set the factory used to generate objects which can observe individual DNS queries.
+     *
      * @param lifecycleObserverFactory the factory used to generate objects which can observe individual DNS queries.
      * @return {@code this}
      */
@@ -167,6 +168,7 @@ public final class DnsNameResolverBuilder {
      * Compute a {@link ResolvedAddressTypes} from some {@link InternetProtocolFamily}s.
      * An empty input will return the default value, based on "java.net" System properties.
      * Valid inputs are (), (IPv4), (IPv6), (Ipv4, IPv6) and (IPv6, IPv4).
+     *
      * @param internetProtocolFamilies a valid sequence of {@link InternetProtocolFamily}s
      * @return a {@link ResolvedAddressTypes}
      */
@@ -178,15 +180,15 @@ public final class DnsNameResolverBuilder {
             throw new IllegalArgumentException("No more than 2 InternetProtocolFamilies");
         }
 
-        switch(internetProtocolFamilies[0]) {
+        switch (internetProtocolFamilies[0]) {
             case IPv4:
                 return (internetProtocolFamilies.length >= 2
                         && internetProtocolFamilies[1] == InternetProtocolFamily.IPv6) ?
-                        ResolvedAddressTypes.IPV4_PREFERRED: ResolvedAddressTypes.IPV4_ONLY;
+                        ResolvedAddressTypes.IPV4_PREFERRED : ResolvedAddressTypes.IPV4_ONLY;
             case IPv6:
                 return (internetProtocolFamilies.length >= 2
                         && internetProtocolFamilies[1] == InternetProtocolFamily.IPv4) ?
-                        ResolvedAddressTypes.IPV6_PREFERRED: ResolvedAddressTypes.IPV6_ONLY;
+                        ResolvedAddressTypes.IPV6_PREFERRED : ResolvedAddressTypes.IPV6_ONLY;
             default:
                 throw new IllegalArgumentException(
                         "Couldn't resolve ResolvedAddressTypes from InternetProtocolFamily array");
@@ -277,6 +279,7 @@ public final class DnsNameResolverBuilder {
     /**
      * Set the {@link DnsServerAddressStreamProvider} which is used to determine which DNS server is used to resolve
      * each hostname.
+     *
      * @return {@code this}.
      */
     public DnsNameResolverBuilder nameServerProvider(DnsServerAddressStreamProvider dnsServerAddressStreamProvider) {
@@ -313,13 +316,13 @@ public final class DnsNameResolverBuilder {
         return this;
     }
 
-  /**
-   * Set the number of dots which must appear in a name before an initial absolute query is made.
-   * The default value is {@code 1}.
-   *
-   * @param ndots the ndots value
-   * @return {@code this}
-   */
+    /**
+     * Set the number of dots which must appear in a name before an initial absolute query is made.
+     * The default value is {@code 1}.
+     *
+     * @param ndots the ndots value
+     * @return {@code this}
+     */
     public DnsNameResolverBuilder ndots(int ndots) {
         this.ndots = ndots;
         return this;
